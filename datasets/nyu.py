@@ -43,7 +43,7 @@ class BaseDataset(Dataset):
 
 
 class NYU(BaseDataset):
-    def __init__(self, mode, path='../datas/nyudepthv2', num_sample=500, mul_factor=1., num_mask=8, scale_kcam=False,
+    def __init__(self, mode, path='../datas/nyu', num_sample=500, mul_factor=1., num_mask=8, scale_kcam=False,
                  rand_scale=True, *args, **kwargs):
         super(NYU, self).__init__(None, mode)
 
