@@ -51,7 +51,7 @@ class Trainer(object):
         self.rank = int(os.environ["LOCAL_RANK"]) if "LOCAL_RANK" in os.environ else 0
         self.cfg.gpu_id = self.cfg.gpus[self.rank]
         self.init_gpu()
-        self.ddp = len(self.cfg.gpus) > 1
+        self.ddp = len(self.cfg.gpus) > 1 or self.cfg.train_frac > 1
         self.iter = 0
         self.epoch = 0
         self.best_metric_ema = 100
@@ -104,13 +104,13 @@ class Trainer(object):
         if self.ddp:
             train_sampler = torch.utils.data.distributed.DistributedSampler(
                 trainset,
-                num_replicas=len(self.cfg.gpus),
+                num_replicas=len(self.cfg.gpus) if len(self.cfg.gpus) > 1 else self.cfg.train_frac,
                 rank=self.rank,
                 shuffle=True,
             )
             test_sampler = torch.utils.data.distributed.DistributedSampler(
                 testset,
-                num_replicas=len(self.cfg.gpus),
+                num_replicas=len(self.cfg.gpus) if len(self.cfg.gpus) > 1 else self.cfg.test_frac,
                 rank=self.rank,
                 shuffle=False,
             )
