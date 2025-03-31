@@ -14,6 +14,36 @@ __all__ = [
     'Pre_MF_Post',
 ]
 
+class NonLocalBlock(nn.Module):
+    """
+    Non-Local Block for capturing long-range dependencies.
+    """
+    def __init__(self, in_channels):
+        super(NonLocalBlock, self).__init__()
+        self.in_channels = in_channels
+        self.inter_channels = in_channels // 2 if in_channels > 1 else 1
+
+        self.g = nn.Conv2d(in_channels, self.inter_channels, kernel_size=1)
+        self.theta = nn.Conv2d(in_channels, self.inter_channels, kernel_size=1)
+        self.phi = nn.Conv2d(in_channels, self.inter_channels, kernel_size=1)
+        self.o = nn.Conv2d(self.inter_channels, in_channels, kernel_size=1)
+        self.softmax = nn.Softmax(dim=-1)
+    
+    def forward(self, x):
+        batch_size, C, H, W = x.size()
+        g_x = self.g(x).view(batch_size, self.inter_channels, -1)
+        g_x = g_x.permute(0, 2, 1)
+        
+        theta_x = self.theta(x).view(batch_size, self.inter_channels, -1)
+        theta_x = theta_x.permute(0, 2, 1)
+        phi_x = self.phi(x).view(batch_size, self.inter_channels, -1)
+        
+        attention_map = self.softmax(torch.bmm(theta_x, phi_x))
+        y = torch.bmm(attention_map, g_x)
+        y = y.permute(0, 2, 1).contiguous().view(batch_size, self.inter_channels, H, W)
+        y = self.o(y)
+        return x + y
+
 
 class Net(nn.Module):
     """
@@ -39,6 +69,9 @@ class Net(nn.Module):
 
         self.inplanes = bc * 4
         self.layer2_img = self._make_layer(block, bc * 8, img_layers[2], stride=2)
+
+        # Add Non-Local Block after layer2_img
+        self.non_local = NonLocalBlock(bc * 8)
 
         # self.inplanes = bc * 8
         # self.layer3_img = self._make_layer(block, bc * 16, img_layers[3], stride=2)
@@ -66,6 +99,10 @@ class Net(nn.Module):
         XI0 = self.conv_img(I)
         XI1 = self.layer1_img(XI0)
         XI2 = self.layer2_img(XI1)
+
+        # Apply Non-Local Block
+        XI2 = self.non_local(XI2)
+        
         # XI3 = self.layer3_img(XI2)
         # XI4 = self.layer4_img(XI3)
         # XI5 = self.layer5_img(XI4)
