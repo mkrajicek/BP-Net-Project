@@ -17,8 +17,6 @@ eggs/
 .eggs/
 #kakaxi314
 .idea/
-runs/
-outputs/
 #
 lib/
 lib64/

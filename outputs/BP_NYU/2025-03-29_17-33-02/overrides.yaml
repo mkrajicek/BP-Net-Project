@@ -1,0 +1,12 @@
+- gpus=[0,1]
+- num_workers=4
+- name=BP_NYU
+- net=PMP
+- data=NYU
+- data.num_mask=1
+- lr=2e-3
+- train_batch_size=8
+- test_batch_size=1
+- nepoch=100
+- test_epoch=80
+- ++net.sbn=true

@@ -1,0 +1,15 @@
+- gpus=[0]
+- num_workers=4
+- name=BP_NYU
+- net=PMP
+- data=NYU
+- data.num_mask=1
+- lr=2e-3
+- train_batch_size=16
+- test_batch_size=1
+- nepoch=60
+- test_epoch=80
+- ++net.sbn=true
+- +train_frac=20
+- +test_frac=4
+- +save=true

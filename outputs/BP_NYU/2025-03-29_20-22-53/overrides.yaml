@@ -1,0 +1,8 @@
+- gpus=[0]
+- name=BP_NYU
+- ++chpt=BP_NYU
+- net=PMP
+- num_workers=4
+- data=NYU
+- test_batch_size=1
+- metric=MetricALL
