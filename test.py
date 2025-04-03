@@ -11,6 +11,8 @@ from PIL import Image
 import os
 from omegaconf import OmegaConf
 from utils import *
+from matplotlib import cm
+import matplotlib.pyplot as plt
 
 
 def test(run, mode='selval', save=False):
@@ -35,8 +37,12 @@ def test(run, mode='selval', save=False):
                 for i in range(output.shape[0]):
                     index = idx * output.shape[0] + i
                     file_path = os.path.join(dir_path, f'{index:010d}.png')
-                    img = (output[i, 0] * 256.0).detach().cpu().numpy().astype('uint16')
-                    Img = Image.fromarray(img)
+                    img = output[i, 0].detach().cpu().numpy()
+                    img_normalized = (img - img.min()) / (img.max() - img.min())
+                    colormap = cm.get_cmap('viridis')
+                    img_colored = colormap(img_normalized)
+                    img_colored = (img_colored[:, :, :3] * 255).astype('uint8')
+                    Img = Image.fromarray(img_colored)
                     Img.save(file_path)
     logs = ""
     for name, top in zip(run.metric.metric_name, tops):

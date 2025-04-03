@@ -42,7 +42,7 @@ class NonLocalBlock(nn.Module):
         y = torch.bmm(attention_map, g_x)
         y = y.permute(0, 2, 1).contiguous().view(batch_size, self.inter_channels, H, W)
         y = self.o(y)
-        return x + y
+        return x + y  
 
 
 class Net(nn.Module):
@@ -50,7 +50,7 @@ class Net(nn.Module):
     network
     """
 
-    def __init__(self, block=BasicBlock, bc=1, img_layers=[2, 2, 2],
+    def __init__(self, block=BasicBlock, bc=4, img_layers=[2, 2, 2, 2],
                  drop_path=0.1, norm_layer=nn.BatchNorm2d, padding_mode='zeros', drift=1e6):
         super().__init__()
         self.drift = drift
@@ -70,12 +70,12 @@ class Net(nn.Module):
         self.inplanes = bc * 4
         self.layer2_img = self._make_layer(block, bc * 8, img_layers[2], stride=2)
 
-        # Add Non-Local Block after layer2_img
-        self.non_local = NonLocalBlock(bc * 8)
+        self.inplanes = bc * 8
+        self.layer3_img = self._make_layer(block, bc * 16, img_layers[3], stride=2)
 
-        # self.inplanes = bc * 8
-        # self.layer3_img = self._make_layer(block, bc * 16, img_layers[3], stride=2)
-        #
+        # Add Non-Local Block after layer3_img
+        self.non_local = NonLocalBlock(bc * 8)
+        
         # self.inplanes = bc * 16
         # self.layer4_img = self._make_layer(block, bc * 16, img_layers[4], stride=2)
         #
@@ -84,8 +84,8 @@ class Net(nn.Module):
 
         self.pred0 = PMP(level=0, in_ch=bc * 4, out_ch=bc * 2, drop_path=drop_path, pool=False)
         self.pred1 = PMP(level=1, in_ch=bc * 8, out_ch=bc * 4, drop_path=drop_path)
-        self.pred2 = PMP(level=2, in_ch=bc * 16, out_ch=bc * 8, drop_path=drop_path, up=False)
-        # self.pred3 = PMP(level=3, in_ch=bc * 16, out_ch=bc * 16, drop_path=drop_path)
+        self.pred2 = PMP(level=2, in_ch=bc * 16, out_ch=bc * 8, drop_path=drop_path)
+        self.pred3 = PMP(level=3, in_ch=bc * 16, out_ch=bc * 16, drop_path=drop_path, up=False)
         # self.pred4 = PMP(level=4, in_ch=bc * 16, out_ch=bc * 16, drop_path=drop_path)
         # self.pred5 = PMP(level=5, in_ch=bc * 16, out_ch=bc * 16, drop_path=drop_path, up=False)
 
@@ -99,24 +99,24 @@ class Net(nn.Module):
         XI0 = self.conv_img(I)
         XI1 = self.layer1_img(XI0)
         XI2 = self.layer2_img(XI1)
+        XI3 = self.layer3_img(XI2)
 
         # Apply Non-Local Block
         XI2 = self.non_local(XI2)
-        
-        # XI3 = self.layer3_img(XI2)
+
         # XI4 = self.layer4_img(XI3)
         # XI5 = self.layer5_img(XI4)
 
         # fout, dout = self.pred5(fout=None, dout=None, XI=XI5, S=S, K=K)
         # output.append(F.interpolate(dout, scale_factor=2 ** 5, mode='bilinear', align_corners=True))
         #
-        # fout, dout = self.pred4(fout=fout, dout=dout, XI=XI4, S=S, K=K)
+        # fout, dout = self.pred4(fout=None, dout=None, XI=XI4, S=S, K=K)
         # output.append(F.interpolate(dout, scale_factor=2 ** 4, mode='bilinear', align_corners=True))
-        #
-        # fout, dout = self.pred3(fout=fout, dout=dout, XI=XI3, S=S, K=K)
-        # output.append(F.interpolate(dout, scale_factor=2 ** 3, mode='bilinear', align_corners=True))
+        
+        fout, dout = self.pred3(fout=None, dout=None, XI=XI3, S=S, K=K)
+        output.append(F.interpolate(dout, scale_factor=2 ** 3, mode='bilinear', align_corners=True))
 
-        fout, dout = self.pred2(fout=None, dout=None, XI=XI2, S=S, K=K)
+        fout, dout = self.pred2(fout=fout, dout=dout, XI=XI2, S=S, K=K)
         output.append(F.interpolate(dout, scale_factor=2 ** 2, mode='bilinear', align_corners=True))
 
         fout, dout = self.pred1(fout=fout, dout=dout, XI=XI1, S=S, K=K)

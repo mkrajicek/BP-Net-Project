@@ -19,7 +19,6 @@ eggs/
 .idea/
 runs/
 outputs/
-results/
 #
 lib/
 lib64/
