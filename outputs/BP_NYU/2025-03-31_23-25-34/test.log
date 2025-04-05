@@ -1,0 +1,5 @@
+[2025-03-31 23:25:34,436][BP_NYU][INFO] - device is 0
+[2025-03-31 23:25:34,436][BP_NYU][INFO] - Random Seed: 0001
+[2025-03-31 23:25:35,627][BP_NYU][INFO] - num_train = 23792, num_test = 654
+[2025-03-31 23:25:36,186][BP_NYU][INFO] - resume CHECKPOINTS
+[2025-03-31 23:25:38,953][BP_NYU][INFO] - best_metric_ema=0.3274

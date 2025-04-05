@@ -1,0 +1,5 @@
+[2025-04-02 01:30:47,941][BP_NYU][INFO] - device is 0
+[2025-04-02 01:30:47,941][BP_NYU][INFO] - Random Seed: 0001
+[2025-04-02 01:30:48,602][BP_NYU][INFO] - num_train = 148, num_test = 164
+[2025-04-02 01:30:49,024][BP_NYU][INFO] - sbn
+[2025-04-02 05:10:43,178][BP_NYU][INFO] - best_metric_ema=0.7502
