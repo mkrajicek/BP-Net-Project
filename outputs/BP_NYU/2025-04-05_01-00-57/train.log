@@ -2,3 +2,4 @@
 [2025-04-05 01:00:58,557][BP_NYU][INFO] - Random Seed: 0001
 [2025-04-05 01:00:59,854][BP_NYU][INFO] - num_train = 148, num_test = 164
 [2025-04-05 01:01:00,686][BP_NYU][INFO] - sbn
+[2025-04-05 15:40:04,322][BP_NYU][INFO] - best_metric_ema=1.2048
