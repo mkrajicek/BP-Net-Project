@@ -50,7 +50,7 @@ class Net(nn.Module):
     network
     """
 
-    def __init__(self, block=BasicBlock, bc=4, img_layers=[2, 2, 2, 2],
+    def __init__(self, block=BasicBlock, bc=1, img_layers=[2, 2, 2, 2],
                  drop_path=0.1, norm_layer=nn.BatchNorm2d, padding_mode='zeros', drift=1e6):
         super().__init__()
         self.drift = drift
